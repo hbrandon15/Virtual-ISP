@@ -34,8 +34,10 @@ def linearize_bayer(bayer, black_level, white_level):
     black_scalar = float(black_level[0])
     linear = (bayer.astype(np.float32) - black_scalar) / \
         (white_level - black_scalar)
-    return np.clip(linear, 0.0, 1.0) # limit linear between 0 and 1
+    return np.clip(linear, 0.0, 1.0) # limit linear values between 0 and 1
 
 
 bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
-linear = linearize_bayer(bayer, black, white)
+linear = linearize_bayer(bayer, black, white) # each pixel is a sensor intensity fraction
+
+print(linear)
