@@ -40,4 +40,5 @@ def linearize_bayer(bayer, black_level, white_level):
 bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
 linear = linearize_bayer(bayer, black, white) # each pixel is a sensor intensity fraction
 
-print(linear)
+
+
