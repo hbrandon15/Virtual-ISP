@@ -22,17 +22,12 @@ def decode_arw_image(file_path):
         cfa = raw.raw_pattern.copy()  # CFA layout, [[0,1], [1,2]]
         black = np.array(raw.black_level_per_channel)
         white = raw.white_level
+        color_desc = raw.color_desc
 
-    print("bayer shape:", bayer.shape, "dtype:", bayer.dtype)
-    print("cfa pattern:\n", cfa)
-    print("black levels:", black, "white level:", white)
-
-    # compute linear sensor values
-    # convert raw sensor codes into a clean 0-1 signal
-    lin = np.clip((bayer - black) / (white - black), 0, 1) 
-    
-	# build color masks
-    
+    # print("bayer shape:", bayer.shape, "dtype:", bayer.dtype)
+    # print("cfa pattern:\n", cfa)
+    # print("black levels:", black, "white level:", white)
+    return bayer, cfa, black, white, color_desc
 
 
 decode_arw_image('.\imgs\AKG02229.ARW')
