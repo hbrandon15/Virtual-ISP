@@ -2,9 +2,18 @@ import numpy as np
 import rawpy
 import matplotlib.pyplot as plt
 
+# Virtual ISP Pipeline
+# 1. Decode & extract data
+# 2. Linearize
+# 3. Create label map
+# 4. Demosaic
+# 5. White balance
+# 6. Color Space conversion
+# 7. Gamma / tone mapping
+
+
+
 # Post Process a RAW image
-
-
 def display_arw_image(file_path):
     with rawpy.imread(file_path) as raw:
         rgb = raw.postprocess()  # convert sensor data into a standard RGB image
@@ -48,3 +57,4 @@ def build_rgb_masks(bayer, cfa, color_desc):
 
 bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
 linear = linearize_bayer(bayer, black, white) # each pixel is a sensor intensity fraction
+
