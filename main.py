@@ -2,9 +2,17 @@ import numpy as np
 import rawpy
 import matplotlib.pyplot as plt
 
+# Virtual ISP Pipeline
+# 1. Decode & extract data
+# 2. Linearize
+# 3. Create label map
+# 4. Demosaic
+# 5. White balance
+# 6. Color Space conversion
+# 7. Gamma / tone mapping
+
+
 # Post Process a RAW image
-
-
 def display_arw_image(file_path):
     with rawpy.imread(file_path) as raw:
         rgb = raw.postprocess()  # convert sensor data into a standard RGB image
@@ -14,6 +22,8 @@ def display_arw_image(file_path):
     plt.show()
 
 # 1.) Decode & extract data
+
+
 def decode_arw_image(file_path):
     with rawpy.imread(file_path) as raw:
         bayer = raw.raw_image_visible.copy()  # 2D Bayer mosaic (decoded RAW data)
@@ -28,23 +38,30 @@ def decode_arw_image(file_path):
     return bayer, cfa, black, white, color_desc
 
 # 2.) Find linear
+
+
 def linearize_bayer(bayer, black_level, white_level):
     black_scalar = float(black_level[0])
     linear = (bayer.astype(np.float32) - black_scalar) / \
         (white_level - black_scalar)
-    return np.clip(linear, 0.0, 1.0) # limit linear values between 0 and 1
-
+    return np.clip(linear, 0.0, 1.0)  # limit linear values between 0 and 1
 
 
 # 3.) Create label map
 def build_rgb_masks(bayer, cfa, color_desc):
     # get image height and width
     h, w = bayer.shape
-    
-	# a.) repeat 2x2 CFA tile to full image size
+
+    # a.) repeat 2x2 CFA tile to full image size
     full_ids = np.tile(cfa, (h // 2 + 1, w // 2 + 1))[:h, :w]
 
+    # b.) Map CFA indices to channel names using color_desc, then create per-channel boolean masks
+    red_mask = (full_ids == color_desc.index(b'R'))
+    green_mask = (full_ids == color_desc.index(b'G'))
+    blue_mask = (full_ids == color_desc.index(b'B'))
+    return red_mask, green_mask, blue_mask
 
 
 bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
-linear = linearize_bayer(bayer, black, white) # each pixel is a sensor intensity fraction
+# each pixel is a sensor intensity fraction
+linear = linearize_bayer(bayer, black, white)
