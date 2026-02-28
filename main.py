@@ -61,7 +61,19 @@ def build_rgb_masks(bayer, cfa, color_desc):
     blue_mask = (full_ids == color_desc.index(b'B'))
     return red_mask, green_mask, blue_mask
 
+# 4.) Demosaic - Bilinear
+def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask): 
+    
+
+	return rgb_linear
 
 bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
 # each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
+
+# Create RGB masks
+red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
+
+# Create RGB linear 
+rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
+
