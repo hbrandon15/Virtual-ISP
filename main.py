@@ -67,6 +67,12 @@ def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask):
 
 	return rgb_linear
 
+# Interpolate 
+def interpolate_channel(values, known_mask): 
+     
+
+	return np.where(den > 0, num / den, values)
+
 bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
 # each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
