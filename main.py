@@ -61,7 +61,68 @@ def build_rgb_masks(bayer, cfa, color_desc):
     blue_mask = (full_ids == color_desc.index(b'B'))
     return red_mask, green_mask, blue_mask
 
+# 4.) Demosaic - Bilinear
+
+
+def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask):
+
+    # create a blank red channel
+    h, w = linear_bayer.shape
+
+    R = np.zeros((h, w), dtype=np.float32)
+    R[red_mask] = linear_bayer[red_mask]
+    # interpolate red channel
+    R = interpolate_channel(R, red_mask)
+
+    # repeat for green
+
+    G = np.zeros((h, w), dtype=np.float32)
+    G[green_mask] = linear_bayer[green_mask]
+    G = interpolate_channel(G, green_mask)
+
+    # repeat for blue
+
+    B = np.zeros((h, w), dtype=np.float32)
+    B[blue_mask] = linear_bayer[blue_mask]
+    B = interpolate_channel(B, blue_mask)
+
+    rgb_linear = np.stack([R, G, B], axis=-1)
+
+    return rgb_linear
+
+
+def interpolate_channel(values, known_mask):
+    out = values.copy()
+    h, w = values.shape
+
+    for i in range(h):
+        for j in range(w):
+            if known_mask[i, j]:
+                continue
+
+            neighbors = []
+
+            if i > 0 and known_mask[i - 1, j]:
+                neighbors.append(values[i - 1, j])   # up
+            if i < h - 1 and known_mask[i + 1, j]:
+                neighbors.append(values[i + 1, j])   # down
+            if j > 0 and known_mask[i, j - 1]:
+                neighbors.append(values[i, j - 1])   # left
+            if j < w - 1 and known_mask[i, j + 1]:
+                neighbors.append(values[i, j + 1])   # right
+
+            if neighbors:
+                out[i, j] = np.mean(neighbors)
+
+    return out
+
 
 bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
 # each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
+
+# Create RGB masks
+red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
+
+# Create RGB linear
+rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
