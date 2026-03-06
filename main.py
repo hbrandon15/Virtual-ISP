@@ -62,16 +62,40 @@ def build_rgb_masks(bayer, cfa, color_desc):
     return red_mask, green_mask, blue_mask
 
 # 4.) Demosaic - Bilinear
-def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask): 
-    
 
-	return rgb_linear
 
-# Interpolate 
-def interpolate_channel(values, known_mask): 
-     
+def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask):
 
-	return np.where(den > 0, num / den, values)
+    return rgb_linear
+
+# Interpolate
+
+
+def interpolate_channel(values, known_mask):
+    out = values.copy()
+    h, w = values.shape
+
+    for i in range(h):
+        for j in range(w):
+            if known_mask[i, j]:
+                continue
+
+            neighbors = []
+
+            if i > 0 and known_mask[i - 1, j]:
+                neighbors.append(values[i - 1, j])   # up
+            if i < h - 1 and known_mask[i + 1, j]:
+                neighbors.append(values[i + 1, j])   # down
+            if j > 0 and known_mask[i, j - 1]:
+                neighbors.append(values[i, j - 1])   # left
+            if j < w - 1 and known_mask[i, j + 1]:
+                neighbors.append(values[i, j + 1])   # right
+
+            if neighbors:
+                out[i, j] = np.mean(neighbors)
+
+    return out
+
 
 bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
 # each pixel is a sensor intensity fraction
@@ -80,6 +104,5 @@ linear = linearize_bayer(bayer, black, white)
 # Create RGB masks
 red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
 
-# Create RGB linear 
+# Create RGB linear
 rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
-
