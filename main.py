@@ -66,9 +66,29 @@ def build_rgb_masks(bayer, cfa, color_desc):
 
 def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask):
 
-    return rgb_linear
+    # create a blank red channel
+    h, w = linear_bayer.shape
 
-# Interpolate
+    R = np.zeros((h, w), dtype=np.float32)
+    R[red_mask] = linear_bayer[red_mask]
+    # interpolate red channel
+    R = interpolate_channel(R, red_mask)
+
+    # repeat for green
+
+    G = np.zeros((h, w), dtype=np.float32)
+    G[green_mask] = linear_bayer[green_mask]
+    G = interpolate_channel(G, green_mask)
+
+    # repeat for blue
+
+    B = np.zeros((h, w), dtype=np.float32)
+    B[blue_mask] = linear_bayer[blue_mask]
+    B = interpolate_channel(B, blue_mask)
+
+    rgb_linear = np.stack([R, G, B], axis=-1)
+
+    return rgb_linear
 
 
 def interpolate_channel(values, known_mask):
