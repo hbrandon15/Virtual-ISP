@@ -36,7 +36,8 @@ def decode_arw_image(file_path):
     # print("bayer shape:", bayer.shape, "dtype:", bayer.dtype)
     # print("cfa pattern:\n", cfa)
     # print("black levels:", black, "white level:", white)
-    return bayer, cfa, black, white, color_desc
+    # print(white_balance_multipliers)
+    return bayer, cfa, black, white, color_desc, white_balance_multipliers
 
 # 2.) Find linear
 
@@ -118,7 +119,7 @@ def interpolate_channel(values, known_mask):
     return out
 
 
-bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
+bayer, cfa, black, white, color_desc, whitebalance_mult = decode_arw_image('.\imgs\AKG02229.ARW')
 # each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
 
