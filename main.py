@@ -31,6 +31,7 @@ def decode_arw_image(file_path):
         black = np.array(raw.black_level_per_channel)
         white = raw.white_level
         color_desc = raw.color_desc
+        white_balance_multipliers = raw.camera_whitebalance
 
     # print("bayer shape:", bayer.shape, "dtype:", bayer.dtype)
     # print("cfa pattern:\n", cfa)
