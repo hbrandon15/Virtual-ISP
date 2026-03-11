@@ -93,24 +93,13 @@ def interpolate_channel(values, known_mask):
     out = values.copy()
     h, w = values.shape
 
-    for i in range(h):
-        for j in range(w):
-            if known_mask[i, j]:
-                continue
+    neighbor_sum = np.zeros_like(values)
 
-            neighbors = []
+    neighbor_sum[1:, :] += values[:-1, :]  # add rows above
+    neighbor_sum[:-1, :] += values[1:, :] # add rows below
+    neighbor_sum[1:, :] += values[:-1, :]
+    neighbor_sum[1:, :] += values[:-1, :]
 
-            if i > 0 and known_mask[i - 1, j]:
-                neighbors.append(values[i - 1, j])   # up
-            if i < h - 1 and known_mask[i + 1, j]:
-                neighbors.append(values[i + 1, j])   # down
-            if j > 0 and known_mask[i, j - 1]:
-                neighbors.append(values[i, j - 1])   # left
-            if j < w - 1 and known_mask[i, j + 1]:
-                neighbors.append(values[i, j + 1])   # right
-
-            if neighbors:
-                out[i, j] = np.mean(neighbors)
 
     return out
 
@@ -131,6 +120,12 @@ def normalize_white_balance(wb_mult):
     print(n_wb)
 
     return n_wb
+
+
+def apply_white_balance(rgb_lienar, n_wb):
+    # setup function to apply WB
+
+    return
 
 
 bayer, cfa, black, white, color_desc, whitebalance_mult = decode_arw_image(
