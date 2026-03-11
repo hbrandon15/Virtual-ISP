@@ -33,10 +33,6 @@ def decode_arw_image(file_path):
         color_desc = raw.color_desc
         white_balance_multipliers = raw.camera_whitebalance
 
-    # print("bayer shape:", bayer.shape, "dtype:", bayer.dtype)
-    # print("cfa pattern:\n", cfa)
-    # print("black levels:", black, "white level:", white)
-    # print(white_balance_multipliers)
     return bayer, cfa, black, white, color_desc, white_balance_multipliers
 
 # 2.) Find linear
@@ -119,7 +115,26 @@ def interpolate_channel(values, known_mask):
     return out
 
 
-bayer, cfa, black, white, color_desc, whitebalance_mult = decode_arw_image('.\imgs\AKG02229.ARW')
+def normalize_white_balance(wb_mult):
+
+    red_balance, green_balance, blue_balance = wb_mult[0], wb_mult[1], wb_mult[2]
+
+    # Scale balance based on green
+    r_norm = red_balance / green_balance
+    g_norm = green_balance / green_balance
+    b_norm = blue_balance / green_balance
+
+    n_wb = [r_norm, g_norm, b_norm]
+
+    n_wb = np.round(n_wb, decimals=2)
+
+    print(n_wb)
+
+    return n_wb
+
+
+bayer, cfa, black, white, color_desc, whitebalance_mult = decode_arw_image(
+    '.\imgs\AKG02229.ARW')
 # each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
 
@@ -128,3 +143,7 @@ red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
 
 # Create RGB linear
 rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
+
+
+# testing correct wb normalization:
+normalize_white_balance(whitebalance_mult)
