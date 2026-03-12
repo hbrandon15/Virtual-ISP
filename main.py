@@ -115,6 +115,8 @@ def interpolate_channel(values, known_mask):
     safe_count = np.where(neighbor_count > 0, neighbor_count, 1)
     avg = neighbor_sum / safe_count
 
+    out[~known_mask] = avg[~known_mask]
+
     return out
 
 
