@@ -133,8 +133,6 @@ def normalize_white_balance(wb_mult):
 
     n_wb = np.round(n_wb, decimals=2)
 
-    print(n_wb)
-
     return n_wb
 
 
