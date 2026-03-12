@@ -95,11 +95,10 @@ def interpolate_channel(values, known_mask):
 
     neighbor_sum = np.zeros_like(values)
 
-    neighbor_sum[1:, :] += values[:-1, :]  # add rows above
-    neighbor_sum[:-1, :] += values[1:, :] # add rows below
-    neighbor_sum[1:, :] += values[:-1, :]
-    neighbor_sum[1:, :] += values[:-1, :]
-
+    neighbor_sum[1:, :] += values[:-1, :]  # value from the top neighbor
+    neighbor_sum[:-1, :] += values[1:, :]  # value from the bottom neighbor
+    neighbor_sum[:, 1:] += values[:, :-1]  # value from left neighbor
+    neighbor_sum[:, -1:] += values[:, 1:]  # value from right neighbor
 
     return out
 
