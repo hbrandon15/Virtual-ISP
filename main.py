@@ -98,7 +98,7 @@ def interpolate_channel(values, known_mask):
     neighbor_sum[1:, :] += values[:-1, :]  # value from the top neighbor
     neighbor_sum[:-1, :] += values[1:, :]  # value from the bottom neighbor
     neighbor_sum[:, 1:] += values[:, :-1]  # value from left neighbor
-    neighbor_sum[:, -1:] += values[:, 1:]  # value from right neighbor
+    neighbor_sum[:, :-1] += values[:, 1:]  # value from right neighbor
 
     return out
 
