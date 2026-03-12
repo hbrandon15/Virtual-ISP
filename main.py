@@ -93,7 +93,8 @@ def interpolate_channel(values, known_mask):
     out = values.copy()
     h, w = values.shape
 
-    neighbor_sum, neighbor_count = np.zeros_like(values)
+    neighbor_sum = np.zeros_like(values)
+    neighbor_count = np.zeros_like(values)
 
     neighbor_sum[1:, :] += values[:-1, :]  # value from the top neighbor
     neighbor_sum[:-1, :] += values[1:, :]  # value from the bottom neighbor
