@@ -136,10 +136,16 @@ def normalize_white_balance(wb_mult):
     return n_wb
 
 
-def apply_white_balance(rgb_lienar, n_wb):
-    # setup function to apply WB
+def apply_white_balance(rgb_lienar, gains):
+    # multiply each channel by its gain
+    # clip to [0,1]
+    # return result
 
-    return
+    red_channel = rgb_lienar[:, :, 0]
+    green_channel = rgb_lienar[:, :, 1]
+    blue_channel = rgb_lienar[:, :, 2]
+
+    return None
 
 
 bayer, cfa, black, white, color_desc, whitebalance_mult = decode_arw_image(
