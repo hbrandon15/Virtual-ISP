@@ -31,11 +31,9 @@ def decode_arw_image(file_path):
         black = np.array(raw.black_level_per_channel)
         white = raw.white_level
         color_desc = raw.color_desc
+        white_balance_multipliers = raw.camera_whitebalance
 
-    # print("bayer shape:", bayer.shape, "dtype:", bayer.dtype)
-    # print("cfa pattern:\n", cfa)
-    # print("black levels:", black, "white level:", white)
-    return bayer, cfa, black, white, color_desc
+    return bayer, cfa, black, white, color_desc, white_balance_multipliers
 
 # 2.) Find linear
 
@@ -95,29 +93,69 @@ def interpolate_channel(values, known_mask):
     out = values.copy()
     h, w = values.shape
 
-    for i in range(h):
-        for j in range(w):
-            if known_mask[i, j]:
-                continue
+    neighbor_sum = np.zeros_like(values)
+    neighbor_count = np.zeros_like(values)
 
-            neighbors = []
+    neighbor_sum[1:, :] += values[:-1, :]  # value from the top neighbor
+    neighbor_sum[:-1, :] += values[1:, :]  # value from the bottom neighbor
+    neighbor_sum[:, 1:] += values[:, :-1]  # value from left neighbor
+    neighbor_sum[:, :-1] += values[:, 1:]  # value from right neighbor
 
-            if i > 0 and known_mask[i - 1, j]:
-                neighbors.append(values[i - 1, j])   # up
-            if i < h - 1 and known_mask[i + 1, j]:
-                neighbors.append(values[i + 1, j])   # down
-            if j > 0 and known_mask[i, j - 1]:
-                neighbors.append(values[i, j - 1])   # left
-            if j < w - 1 and known_mask[i, j + 1]:
-                neighbors.append(values[i, j + 1])   # right
+    # need to convert known_mask to float
+    mask = known_mask.astype(np.float32)
 
-            if neighbors:
-                out[i, j] = np.mean(neighbors)
+    neighbor_count[1:, :] += mask[:-1, :]
+    neighbor_count[:-1, :] += mask[1:, :]
+    neighbor_count[:, 1:] += mask[:, :-1]
+    neighbor_count[:, :-1] += mask[:, 1:]
+
+    # now we need to find the avg
+    # first we need to ensure count > 0
+
+    safe_count = np.where(neighbor_count > 0, neighbor_count, 1)
+    avg = neighbor_sum / safe_count
+
+    out[~known_mask] = avg[~known_mask]
 
     return out
 
 
-bayer, cfa, black, white, color_desc = decode_arw_image('.\imgs\AKG02229.ARW')
+def normalize_white_balance(wb_mult):
+
+    red_balance, green_balance, blue_balance = wb_mult[0], wb_mult[1], wb_mult[2]
+
+    # Scale balance based on green
+    r_norm = red_balance / green_balance
+    g_norm = green_balance / green_balance
+    b_norm = blue_balance / green_balance
+
+    n_wb = [r_norm, g_norm, b_norm]
+
+    n_wb = np.round(n_wb, decimals=2)
+
+    return n_wb
+
+
+def apply_white_balance(rgb_lienar, gains):
+    # return result
+
+    red_channel = rgb_lienar[:, :, 0]
+    green_channel = rgb_lienar[:, :, 1]
+    blue_channel = rgb_lienar[:, :, 2]
+
+	# multiply each channel by its gain
+    red_corrected = red_channel * gains[0]
+    green_corrected = green_channel * gains[1]
+    blue_corrected = blue_channel * gains[2]
+    
+	# return clip to [0,1]
+    rgb_wb = np.stack([red_corrected, green_corrected, blue_corrected], axis=-1)
+
+    return np.clip(rgb_wb, 0.0, 1.0)
+
+
+bayer, cfa, black, white, color_desc, whitebalance_mult = decode_arw_image(
+    '.\imgs\AKG02229.ARW')
 # each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
 
@@ -126,3 +164,7 @@ red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
 
 # Create RGB linear
 rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
+
+
+# testing correct wb normalization:
+normalize_white_balance(whitebalance_mult)
