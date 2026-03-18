@@ -143,15 +143,21 @@ def apply_white_balance(rgb_lienar, gains):
     green_channel = rgb_lienar[:, :, 1]
     blue_channel = rgb_lienar[:, :, 2]
 
-	# multiply each channel by its gain
+    # multiply each channel by its gain
     red_corrected = red_channel * gains[0]
     green_corrected = green_channel * gains[1]
     blue_corrected = blue_channel * gains[2]
-    
-	# return clip to [0,1]
-    rgb_wb = np.stack([red_corrected, green_corrected, blue_corrected], axis=-1)
+
+    # return clip to [0,1]
+    rgb_wb = np.stack(
+        [red_corrected, green_corrected, blue_corrected], axis=-1)
 
     return np.clip(rgb_wb, 0.0, 1.0)
+
+
+def color_space_conversion():
+
+    return None
 
 
 bayer, cfa, black, white, color_desc, whitebalance_mult = decode_arw_image(
