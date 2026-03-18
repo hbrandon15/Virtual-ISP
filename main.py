@@ -32,8 +32,14 @@ def decode_arw_image(file_path):
         white = raw.white_level
         color_desc = raw.color_desc
         white_balance_multipliers = raw.camera_whitebalance
+        
+        # !!color_matrix is often empty for Sony files!!
+        # color_correction_matrix = raw.color_matrix
+        color_correction_matrix = raw.rgb_xyz_matrix[:3,:] # remove empty 4th row
 
-    return bayer, cfa, black, white, color_desc, white_balance_multipliers
+        print(color_correction_matrix)
+
+    return bayer, cfa, black, white, color_desc, white_balance_multipliers, color_correction_matrix
 
 # 2.) Find linear
 
