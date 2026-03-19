@@ -164,6 +164,13 @@ def apply_white_balance(rgb_linear, gains):
 
 def color_space_conversion(ccm, rgb_wb):
     # Need to multiply ccm by rgb_wb
+    print(f'Our CCM is: \n{ccm}')
+    print(f'Our rgb_wb is: \n{rgb_wb[0, 0, :]}')
+    # rgb_wb sliced is 3 elements in a flat list i.e.) (3,)
+    # we need to reshape it to a 3x1 if we want to multiply by the ccm
+
+    pixel = rgb_wb[0, 0, :] # shape (3,)
+    column_vector = pixel.reshape(3,1) # new shape (3,1)
 
     return None
 
@@ -188,3 +195,4 @@ wb_gains = normalize_white_balance(whitebalance_mult)
 rgb_wb = apply_white_balance(rgb_linear, wb_gains)
 
 # STEP 6: COLOR CORRECTION
+color_space_conversion(color_correction_matrix, rgb_wb)
