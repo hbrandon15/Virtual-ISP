@@ -37,7 +37,7 @@ def decode_arw_image(file_path):
         # color_correction_matrix = raw.color_matrix
         color_correction_matrix = raw.rgb_xyz_matrix[:3,:] # remove empty 4th row
 
-        print(color_correction_matrix)
+        # print(color_correction_matrix)
 
     return bayer, cfa, black, white, color_desc, white_balance_multipliers, color_correction_matrix
 
@@ -166,7 +166,7 @@ def color_space_conversion():
     return None
 
 
-bayer, cfa, black, white, color_desc, whitebalance_mult = decode_arw_image(
+bayer, cfa, black, white, color_desc, whitebalance_mult, color_correction_matrix = decode_arw_image(
     '.\imgs\AKG02229.ARW')
 # each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
