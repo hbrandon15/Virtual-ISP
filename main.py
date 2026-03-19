@@ -170,7 +170,7 @@ def color_space_conversion(ccm, rgb_wb):
     # we need to reshape it to a 3x1 if we want to multiply by the ccm
 
     first_pixel = rgb_wb[0, 0, :] # shape (3,)
-    column_vector = first_pixel.reshape(3,1) # new shape (3,1)
+    rgb_values = first_pixel.reshape(3,1) # new shape (3,1)
 
     return None
 
