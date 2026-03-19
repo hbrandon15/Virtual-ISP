@@ -32,10 +32,11 @@ def decode_arw_image(file_path):
         white = raw.white_level
         color_desc = raw.color_desc
         white_balance_multipliers = raw.camera_whitebalance
-        
+
         # !!color_matrix is often empty for Sony files!!
         # color_correction_matrix = raw.color_matrix
-        color_correction_matrix = raw.rgb_xyz_matrix[:3,:] # remove empty 4th row
+        # remove empty 4th row
+        color_correction_matrix = raw.rgb_xyz_matrix[:3, :]
 
         # print(color_correction_matrix)
 
@@ -142,12 +143,12 @@ def normalize_white_balance(wb_mult):
     return n_wb
 
 
-def apply_white_balance(rgb_lienar, gains):
+def apply_white_balance(rgb_linear, gains):
     # return result
 
-    red_channel = rgb_lienar[:, :, 0]
-    green_channel = rgb_lienar[:, :, 1]
-    blue_channel = rgb_lienar[:, :, 2]
+    red_channel = rgb_linear[:, :, 0]
+    green_channel = rgb_linear[:, :, 1]
+    blue_channel = rgb_linear[:, :, 2]
 
     # multiply each channel by its gain
     red_corrected = red_channel * gains[0]
@@ -161,22 +162,29 @@ def apply_white_balance(rgb_lienar, gains):
     return np.clip(rgb_wb, 0.0, 1.0)
 
 
-def color_space_conversion():
+def color_space_conversion(ccm, rgb_wb):
+    # Need to multiply ccm by rgb_wb
 
     return None
 
 
+# STEP 1: OBTAIN METADATA
 bayer, cfa, black, white, color_desc, whitebalance_mult, color_correction_matrix = decode_arw_image(
     '.\imgs\AKG02229.ARW')
-# each pixel is a sensor intensity fraction
+# STEP 2: OBTAIN LINEAR - each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
 
-# Create RGB masks
+# STEP 3: CREATE LABEL MAP - Create RGB masks
 red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
 
+# STEP 4: DEMOSAIC
 # Create RGB linear
 rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
 
 
-# testing correct wb normalization:
-normalize_white_balance(whitebalance_mult)
+# STEP 5: WHITE BALANCE
+wb_gains = normalize_white_balance(whitebalance_mult)
+# apply WB
+rgb_wb = apply_white_balance(rgb_linear, wb_gains)
+
+# STEP 6: COLOR CORRECTION
