@@ -165,12 +165,17 @@ def apply_white_balance(rgb_linear, gains):
 def color_space_conversion(ccm, rgb_wb):
     # Need to multiply ccm by rgb_wb
     print(f'Our CCM is: \n{ccm}')
-    print(f'Our rgb_wb is: \n{rgb_wb[0, 0, :]}')
+    print(f'Our rgb_wb is: \n{rgb_wb[0, 0, :]}\n')
     # rgb_wb sliced is 3 elements in a flat list i.e.) (3,)
     # we need to reshape it to a 3x1 if we want to multiply by the ccm
 
-    first_pixel = rgb_wb[0, 0, :] # shape (3,)
-    rgb_values = first_pixel.reshape(3,1) # new shape (3,1)
+    first_pixel = rgb_wb[0, 0, :]  # shape (3,)
+    rgb_values = first_pixel.reshape(3, 1)  # new shape (3,1)
+
+    # Use matrix multiplier '@'
+    result = ccm @ rgb_values
+
+    print(result)
 
     return None
 
