@@ -33,7 +33,14 @@ def decode_arw_image(file_path):
         color_desc = raw.color_desc
         white_balance_multipliers = raw.camera_whitebalance
 
-    return bayer, cfa, black, white, color_desc, white_balance_multipliers
+        # !!color_matrix is often empty for Sony files!!
+        # color_correction_matrix = raw.color_matrix
+        # remove empty 4th row
+        color_correction_matrix = raw.rgb_xyz_matrix[:3, :]
+
+        # print(color_correction_matrix)
+
+    return bayer, cfa, black, white, color_desc, white_balance_multipliers, color_correction_matrix
 
 # 2.) Find linear
 
@@ -136,35 +143,62 @@ def normalize_white_balance(wb_mult):
     return n_wb
 
 
-def apply_white_balance(rgb_lienar, gains):
+def apply_white_balance(rgb_linear, gains):
     # return result
 
-    red_channel = rgb_lienar[:, :, 0]
-    green_channel = rgb_lienar[:, :, 1]
-    blue_channel = rgb_lienar[:, :, 2]
+    red_channel = rgb_linear[:, :, 0]
+    green_channel = rgb_linear[:, :, 1]
+    blue_channel = rgb_linear[:, :, 2]
 
-	# multiply each channel by its gain
+    # multiply each channel by its gain
     red_corrected = red_channel * gains[0]
     green_corrected = green_channel * gains[1]
     blue_corrected = blue_channel * gains[2]
-    
-	# return clip to [0,1]
-    rgb_wb = np.stack([red_corrected, green_corrected, blue_corrected], axis=-1)
+
+    # return clip to [0,1]
+    rgb_wb = np.stack(
+        [red_corrected, green_corrected, blue_corrected], axis=-1)
 
     return np.clip(rgb_wb, 0.0, 1.0)
 
 
-bayer, cfa, black, white, color_desc, whitebalance_mult = decode_arw_image(
+def color_space_conversion(ccm, rgb_wb):
+    h, w, c = rgb_wb.shape
+    # first_pixel = rgb_wb[0, 0, :]  # shape (3,)
+    # rgb_values = first_pixel.reshape(3, 1)  # new shape (3,1)
+
+    # 1. Flatten the image to a list of RGB triplets
+    # reshape(-1,3) will stack our data into rows for processing.
+    pixels = rgb_wb.reshape(-1, 3)
+
+    # 2. Apply CCM. We use .T (transpose) because our pixels are now rows
+    # result shape will be (N,3)
+    corrected_pixels = pixels @ ccm.T
+
+    # 3. Put back into the image shape (H,W,3)
+    result = corrected_pixels.reshape(h, w, 3)
+
+    return np.clip(result, 0.0, 1.0)
+
+
+# STEP 1: OBTAIN METADATA
+bayer, cfa, black, white, color_desc, whitebalance_mult, color_correction_matrix = decode_arw_image(
     '.\imgs\AKG02229.ARW')
-# each pixel is a sensor intensity fraction
+# STEP 2: OBTAIN LINEAR - each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
 
-# Create RGB masks
+# STEP 3: CREATE LABEL MAP - Create RGB masks
 red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
 
+# STEP 4: DEMOSAIC
 # Create RGB linear
 rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
 
 
-# testing correct wb normalization:
-normalize_white_balance(whitebalance_mult)
+# STEP 5: WHITE BALANCE
+wb_gains = normalize_white_balance(whitebalance_mult)
+# apply WB
+rgb_wb = apply_white_balance(rgb_linear, wb_gains)
+
+# STEP 6: COLOR CORRECTION
+rgb_ccm = color_space_conversion(color_correction_matrix, rgb_wb)
