@@ -178,7 +178,7 @@ def color_space_conversion(ccm, rgb_wb):
 	# 3. Put back into the image shape (H,W,3)
     result = corrected_pixels.reshape(h, w, 3)
 
-    return result
+    return np.clip(result, 0.0, 1.0)
 
 
 # STEP 1: OBTAIN METADATA
