@@ -201,4 +201,4 @@ wb_gains = normalize_white_balance(whitebalance_mult)
 rgb_wb = apply_white_balance(rgb_linear, wb_gains)
 
 # STEP 6: COLOR CORRECTION
-color_space_conversion(color_correction_matrix, rgb_wb)
+rgb_ccm = color_space_conversion(color_correction_matrix, rgb_wb)
