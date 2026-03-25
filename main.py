@@ -171,11 +171,11 @@ def color_space_conversion(ccm, rgb_wb):
     # reshape(-1,3) will stack our data into rows for processing.
     pixels = rgb_wb.reshape(-1, 3)
 
-	# 2. Apply CCM. We use .T (transpose) because our pixels are now rows
+    # 2. Apply CCM. We use .T (transpose) because our pixels are now rows
     # result shape will be (N,3)
     corrected_pixels = pixels @ ccm.T
-    
-	# 3. Put back into the image shape (H,W,3)
+
+    # 3. Put back into the image shape (H,W,3)
     result = corrected_pixels.reshape(h, w, 3)
 
     return np.clip(result, 0.0, 1.0)
