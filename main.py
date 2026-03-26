@@ -209,13 +209,11 @@ linear = linearize_bayer(bayer, black, white)
 red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
 
 # STEP 4: DEMOSAIC
-# Create RGB linear
 rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
 
 
 # STEP 5: WHITE BALANCE
 wb_gains = normalize_white_balance(whitebalance_mult)
-# apply WB
 rgb_wb = apply_white_balance(rgb_linear, wb_gains)
 
 # STEP 6: COLOR CORRECTION
