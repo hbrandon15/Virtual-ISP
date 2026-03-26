@@ -223,4 +223,7 @@ rgb_wb = apply_white_balance(rgb_linear, wb_gains)
 rgb_ccm = color_space_conversion(color_correction_matrix, rgb_wb)
 
 # STEP 7: GAMMA AND TONE MAPPING
-srgb_image = apply_srgb_gamma(rgb_ccm)
+rgb_gamma = apply_srgb_gamma(rgb_ccm)
+
+# CONVERT TO UINT8 FOR DISPLAY
+
