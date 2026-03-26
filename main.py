@@ -197,7 +197,7 @@ def apply_srgb_gamma(rgb_linear):
                    1.055 * np.power(rgb_linear, 1.0 / 2.4) - 0.055 ) # if FALSE
 
 
-    return None
+    return np.clip(rgb, 0.0, 1.0)
 
 
 # STEP 1: OBTAIN METADATA
