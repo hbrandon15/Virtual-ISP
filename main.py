@@ -191,6 +191,7 @@ def color_space_conversion(ccm, rgb_wb):
 
 def apply_srgb_gamma(rgb_linear):
 
+
     return None
 
 
@@ -215,3 +216,6 @@ rgb_wb = apply_white_balance(rgb_linear, wb_gains)
 
 # STEP 6: COLOR CORRECTION
 rgb_ccm = color_space_conversion(color_correction_matrix, rgb_wb)
+
+# STEP 7: GAMMA AND TONE MAPPING
+srgb_image = apply_srgb_gamma(rgb_ccm)
