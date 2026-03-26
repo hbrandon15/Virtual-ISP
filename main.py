@@ -21,7 +21,7 @@ def display_arw_image(file_path):
     plt.axis('off')
     plt.show()
 
-# 1.) Decode & extract data
+# -- DECODE AND EXTRACT DATA --
 
 
 def decode_arw_image(file_path):
@@ -42,7 +42,7 @@ def decode_arw_image(file_path):
 
     return bayer, cfa, black, white, color_desc, white_balance_multipliers, color_correction_matrix
 
-# 2.) Find linear
+# -- FIND LINEAR --
 
 
 def linearize_bayer(bayer, black_level, white_level):
@@ -52,7 +52,9 @@ def linearize_bayer(bayer, black_level, white_level):
     return np.clip(linear, 0.0, 1.0)  # limit linear values between 0 and 1
 
 
-# 3.) Create label map
+# -- CREATE LABEL MAP --
+
+
 def build_rgb_masks(bayer, cfa, color_desc):
     # get image height and width
     h, w = bayer.shape
@@ -66,7 +68,7 @@ def build_rgb_masks(bayer, cfa, color_desc):
     blue_mask = (full_ids == color_desc.index(b'B'))
     return red_mask, green_mask, blue_mask
 
-# 4.) Demosaic - Bilinear
+# -- DEMOSAIC - BILINEAR --
 
 
 def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask):
@@ -126,6 +128,8 @@ def interpolate_channel(values, known_mask):
 
     return out
 
+# -- CORRECT WHITE BALANCE --
+
 
 def normalize_white_balance(wb_mult):
 
@@ -161,6 +165,8 @@ def apply_white_balance(rgb_linear, gains):
 
     return np.clip(rgb_wb, 0.0, 1.0)
 
+# -- CORRECT COLOR SPACE --
+
 
 def color_space_conversion(ccm, rgb_wb):
     h, w, c = rgb_wb.shape
@@ -179,6 +185,7 @@ def color_space_conversion(ccm, rgb_wb):
     result = corrected_pixels.reshape(h, w, 3)
 
     return np.clip(result, 0.0, 1.0)
+
 # -- GAMMA & TONE MAPPING --
 
 
