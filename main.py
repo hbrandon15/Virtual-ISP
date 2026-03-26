@@ -192,10 +192,9 @@ def color_space_conversion(ccm, rgb_wb):
 def apply_srgb_gamma(rgb_linear):
 
     # Apply sRGB transfer function
-    rgb = np.where(rgb_linear <= 0.0031308,  # condition 
-                   12.92 * rgb_linear, # if TRUE
-                   1.055 * np.power(rgb_linear, 1.0 / 2.4) - 0.055 ) # if FALSE
-
+    rgb = np.where(rgb_linear <= 0.0031308,  # condition
+                   12.92 * rgb_linear,  # if TRUE
+                   1.055 * np.power(rgb_linear, 1.0 / 2.4) - 0.055)  # if FALSE
 
     return np.clip(rgb, 0.0, 1.0)
 
@@ -226,4 +225,9 @@ rgb_ccm = color_space_conversion(color_correction_matrix, rgb_wb)
 rgb_gamma = apply_srgb_gamma(rgb_ccm)
 
 # CONVERT TO UINT8 FOR DISPLAY
+rgb_display = (rgb_gamma * 255).astype(np.uint8)
 
+plt.imshow(rgb_display)
+plt.title('Final ISP Output')
+plt.axis('off')
+plt.show()
