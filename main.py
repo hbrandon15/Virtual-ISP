@@ -179,6 +179,12 @@ def color_space_conversion(ccm, rgb_wb):
     result = corrected_pixels.reshape(h, w, 3)
 
     return np.clip(result, 0.0, 1.0)
+# -- GAMMA & TONE MAPPING --
+
+
+def apply_srgb_gamma(rgb_linear):
+
+    return None
 
 
 # STEP 1: OBTAIN METADATA
