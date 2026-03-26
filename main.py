@@ -43,7 +43,11 @@ def decode_arw_image(file_path):
             [-0.9689,  1.8758,  0.0415],
             [0.0557, -0.2040,  1.0570]
         ])
-        ccm = xyz_to_srgb @ cam_to_xyz
+        # ccm = xyz_to_srgb @ cam_to_xyz
+        ccm = np.eye(3)
+
+        print("CCM:", ccm)
+        print("cam_to_xyz shape:", cam_to_xyz.shape)
 
     return bayer, cfa, black, white, color_desc, white_balance_multipliers, ccm
 
