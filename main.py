@@ -36,11 +36,16 @@ def decode_arw_image(file_path):
         # !!color_matrix is often empty for Sony files!!
         # color_correction_matrix = raw.color_matrix
         # remove empty 4th row
-        color_correction_matrix = raw.rgb_xyz_matrix[:3, :]
+        cam_to_xyz = raw.rgb_xyz_matrix[:3, :]
 
-        # print(color_correction_matrix)
+        xyz_to_srgb = np.array([
+            [3.2406, -1.5372, -0.4986],
+            [-0.9689,  1.8758,  0.0415],
+            [0.0557, -0.2040,  1.0570]
+        ])
+        ccm = xyz_to_srgb @ cam_to_xyz
 
-    return bayer, cfa, black, white, color_desc, white_balance_multipliers, color_correction_matrix
+    return bayer, cfa, black, white, color_desc, white_balance_multipliers, ccm
 
 # -- FIND LINEAR --
 
@@ -200,7 +205,7 @@ def apply_srgb_gamma(rgb_linear):
 
 
 # STEP 1: OBTAIN METADATA
-bayer, cfa, black, white, color_desc, whitebalance_mult, color_correction_matrix = decode_arw_image(
+bayer, cfa, black, white, color_desc, whitebalance_mult, ccm = decode_arw_image(
     '.\imgs\AKG02229.ARW')
 # STEP 2: OBTAIN LINEAR - each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
@@ -217,7 +222,7 @@ wb_gains = normalize_white_balance(whitebalance_mult)
 rgb_wb = apply_white_balance(rgb_linear, wb_gains)
 
 # STEP 6: COLOR CORRECTION
-rgb_ccm = color_space_conversion(color_correction_matrix, rgb_wb)
+rgb_ccm = color_space_conversion(ccm, rgb_wb)
 
 # STEP 7: GAMMA AND TONE MAPPING
 rgb_gamma = apply_srgb_gamma(rgb_ccm)
