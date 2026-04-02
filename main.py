@@ -235,7 +235,7 @@ rgb_gamma = apply_srgb_gamma(rgb_ccm)
 # CONVERT TO UINT8 FOR DISPLAY
 rgb_display = (rgb_gamma * 255).astype(np.uint8)
 
-plt.imshow(rgb_display)
+plt.imshow(np.rot90(rgb_display))
 plt.title('Final ISP Output')
 plt.axis('off')
 plt.show()
