@@ -211,6 +211,7 @@ def apply_srgb_gamma(rgb_linear):
 # STEP 1: OBTAIN METADATA
 bayer, cfa, black, white, color_desc, whitebalance_mult, ccm = decode_arw_image(
     '.\imgs\AKG02229.ARW')
+
 # STEP 2: OBTAIN LINEAR - each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
 
