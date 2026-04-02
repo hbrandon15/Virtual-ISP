@@ -14,6 +14,11 @@ The pipeline processes a RAW `.ARW` (Sony) file through the following stages:
 6. **Color Space Conversion** — Apply a 3×3 Color Correction Matrix (CCM) to each pixel. Currently uses an identity matrix; cam-to-XYZ and XYZ-to-sRGB matrices are extracted but not yet composed.
 7. **Gamma / Tone Mapping** — Apply the sRGB transfer function (linear below 0.0031308, power curve above).
 
+## Known Limitations / Design Decisions
+- The Color Correction Matrix is bypassed (np.eye(3)) intentionally 
+- Why: the calibration matrices from rawpy are coupled to libraw's internal pipeline conventions, so dropping them into a custom pipeline withouth knowing libraw's exact ordering and scaling contract produces incorrect results (severe green cast). 
+- What would be needed to fix it: either reverse-engineer libraw's conventions or derive an independent Color Correction Matrix from a color check calibration target. 
+
 ## Dependencies
 
 - Python 3.x

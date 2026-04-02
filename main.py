@@ -211,6 +211,7 @@ def apply_srgb_gamma(rgb_linear):
 # STEP 1: OBTAIN METADATA
 bayer, cfa, black, white, color_desc, whitebalance_mult, ccm = decode_arw_image(
     '.\imgs\AKG02229.ARW')
+
 # STEP 2: OBTAIN LINEAR - each pixel is a sensor intensity fraction
 linear = linearize_bayer(bayer, black, white)
 
@@ -234,7 +235,7 @@ rgb_gamma = apply_srgb_gamma(rgb_ccm)
 # CONVERT TO UINT8 FOR DISPLAY
 rgb_display = (rgb_gamma * 255).astype(np.uint8)
 
-plt.imshow(rgb_display)
+plt.imshow(np.rot90(rgb_display))
 plt.title('Final ISP Output')
 plt.axis('off')
 plt.show()
