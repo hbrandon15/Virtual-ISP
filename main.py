@@ -15,18 +15,21 @@ import matplotlib.pyplot as plt
 def display_arw_image(file_path):
     """
     This function is only intended to preview a processed image using rawpy by converting sensor data into a standard RGB image. 
+
     """
     with rawpy.imread(file_path) as raw:
-        rgb = raw.postprocess()  
+        rgb = raw.postprocess()
     plt.imshow(rgb)
     plt.title('ARW Image')
     plt.axis('off')
     plt.show()
 
-# -- DECODE AND EXTRACT DATA --
-
 
 def decode_arw_image(file_path):
+    """
+    DECODE AND EXTRACT DATA
+
+    """
     with rawpy.imread(file_path) as raw:
         bayer = raw.raw_image_visible.copy()  # 2D Bayer mosaic (decoded RAW data)
         cfa = raw.raw_pattern.copy()  # CFA layout, [[0,1], [1,2]]
