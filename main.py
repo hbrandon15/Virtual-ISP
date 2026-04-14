@@ -12,10 +12,12 @@ import matplotlib.pyplot as plt
 # 7. Gamma / tone mapping
 
 
-# Post Process a RAW image
 def display_arw_image(file_path):
+    """
+    This function is only intended to preview a processed image using rawpy by converting sensor data into a standard RGB image. 
+    """
     with rawpy.imread(file_path) as raw:
-        rgb = raw.postprocess()  # convert sensor data into a standard RGB image
+        rgb = raw.postprocess()  
     plt.imshow(rgb)
     plt.title('ARW Image')
     plt.axis('off')
