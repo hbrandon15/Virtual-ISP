@@ -12,19 +12,30 @@ import matplotlib.pyplot as plt
 # 7. Gamma / tone mapping
 
 
-# Post Process a RAW image
 def display_arw_image(file_path):
+    """
+    This function is only intended to preview a processed image using rawpy by converting sensor data into a standard RGB image. 
+
+    """
     with rawpy.imread(file_path) as raw:
-        rgb = raw.postprocess()  # convert sensor data into a standard RGB image
+        rgb = raw.postprocess()
     plt.imshow(rgb)
     plt.title('ARW Image')
     plt.axis('off')
     plt.show()
 
-# -- DECODE AND EXTRACT DATA --
-
 
 def decode_arw_image(file_path):
+    """
+    DECODE AND EXTRACT DATA
+
+    xyz_to_srgb @ cam_to_xyz is unusable standalone — libraw's rgb_xyz_matrix
+    row sums: R=-0.47 (clips to 0), G=1.51, B=0.57 — severe green cast.
+    Requires libraw's internal WB pre-multipliers and normalization to balance.
+    A proper CCM needs either dcraw's hardcoded camera matrices or color checker calibration.
+    See README for details.
+
+    """
     with rawpy.imread(file_path) as raw:
         bayer = raw.raw_image_visible.copy()  # 2D Bayer mosaic (decoded RAW data)
         cfa = raw.raw_pattern.copy()  # CFA layout, [[0,1], [1,2]]
@@ -38,12 +49,6 @@ def decode_arw_image(file_path):
         # remove empty 4th row
         cam_to_xyz = raw.rgb_xyz_matrix[:3, :]
 
-        xyz_to_srgb = np.array([
-            [3.2406, -1.5372, -0.4986],
-            [-0.9689,  1.8758,  0.0415],
-            [0.0557, -0.2040,  1.0570]
-        ])
-        # ccm = xyz_to_srgb @ cam_to_xyz
         ccm = np.eye(3)
 
         print("CCM:", ccm)
@@ -55,32 +60,39 @@ def decode_arw_image(file_path):
 
 
 def linearize_bayer(bayer, black_level, white_level):
+    """
+    Black level - baseline value the sensor reports in complete darkness 
+    White level - saturation point. Any photon count above this level clips to the same max value
+    """
     black_scalar = float(black_level[0])
     linear = (bayer.astype(np.float32) - black_scalar) / \
         (white_level - black_scalar)
     return np.clip(linear, 0.0, 1.0)  # limit linear values between 0 and 1
 
 
-# -- CREATE LABEL MAP --
-
-
 def build_rgb_masks(bayer, cfa, color_desc):
+    """
+    Create a full array of a repeated (tile) color filter array the size of our original image. 
+    Map the color filter array to each color channel name using the incoming color_desc. All color channel masks will be a Boolean type. For the Red channel, if a pixel is red -> True. 
+    """
     # get image height and width
     h, w = bayer.shape
 
-    # a.) repeat 2x2 CFA tile to full image size
     full_ids = np.tile(cfa, (h // 2 + 1, w // 2 + 1))[:h, :w]
 
-    # b.) Map CFA indices to channel names using color_desc, then create per-channel boolean masks
     red_mask = (full_ids == color_desc.index(b'R'))
     green_mask = (full_ids == color_desc.index(b'G'))
     blue_mask = (full_ids == color_desc.index(b'B'))
-    return red_mask, green_mask, blue_mask
 
-# -- DEMOSAIC - BILINEAR --
+    return red_mask, green_mask, blue_mask
 
 
 def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask):
+    """
+    Reconstructing incomplete color sample output from an image sensor overlaid with a color filter array into a full color image. 
+    Bilinear - estimating each missing pixel in both horizontal and vertical directions. 
+
+    """
 
     # create a blank red channel
     h, w = linear_bayer.shape
@@ -108,6 +120,14 @@ def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask):
 
 
 def interpolate_channel(values, known_mask):
+    """
+    values is a full (h,w) float 32 array with mostly zeros, with actual color values at their placed locations. 
+
+    known_mask is a boolean mask (red, green, blue) where it is only True where the selected color actually exists. 
+
+    We are looking at the same color of pixels nearby each and taking the average. 
+
+    """
     out = values.copy()
     h, w = values.shape
 
@@ -157,8 +177,6 @@ def normalize_white_balance(wb_mult):
 
 
 def apply_white_balance(rgb_linear, gains):
-    # return result
-
     red_channel = rgb_linear[:, :, 0]
     green_channel = rgb_linear[:, :, 1]
     blue_channel = rgb_linear[:, :, 2]
@@ -178,17 +196,19 @@ def apply_white_balance(rgb_linear, gains):
 
 
 def color_space_conversion(ccm, rgb_wb):
+    """
+    1. Flatten the image to a list of RGB triplets
+    2. Apply CCM. We use .T (transpose) because our pixels are now rows
+
+    """
     h, w, c = rgb_wb.shape
     # first_pixel = rgb_wb[0, 0, :]  # shape (3,)
     # rgb_values = first_pixel.reshape(3, 1)  # new shape (3,1)
 
-    # 1. Flatten the image to a list of RGB triplets
     # reshape(-1,3) will stack our data into rows for processing.
     pixels = rgb_wb.reshape(-1, 3)
 
-    # 2. Apply CCM. We use .T (transpose) because our pixels are now rows
-    # result shape will be (N,3)
-    corrected_pixels = pixels @ ccm.T
+    corrected_pixels = pixels @ ccm.T  # result shape will be (N,3)
 
     # 3. Put back into the image shape (H,W,3)
     result = corrected_pixels.reshape(h, w, 3)
@@ -221,12 +241,11 @@ red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
 # STEP 4: DEMOSAIC
 rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
 
-
 # STEP 5: WHITE BALANCE
 wb_gains = normalize_white_balance(whitebalance_mult)
 rgb_wb = apply_white_balance(rgb_linear, wb_gains)
 
-# STEP 6: COLOR CORRECTION
+# STEP 6: COLOR CORRECTION (identity matrix — see decode_arw_image comment)
 rgb_ccm = color_space_conversion(ccm, rgb_wb)
 
 # STEP 7: GAMMA AND TONE MAPPING
