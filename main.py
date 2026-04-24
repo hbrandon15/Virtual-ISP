@@ -67,12 +67,12 @@ def linearize_bayer(bayer: np.ndarray, black_level: np.ndarray, white_level: int
     black_scalar = float(black_level[0])
     linear = (bayer.astype(np.float32) - black_scalar) / \
         (white_level - black_scalar)
-    
+
     # return linear array normalized between 0 and 1
-    return np.clip(linear, 0.0, 1.0)  
+    return np.clip(linear, 0.0, 1.0)
 
 
-def build_rgb_masks(bayer, cfa, color_desc):
+def build_rgb_masks(bayer: np.ndarray, cfa: np.ndarray, color_desc: bytes) -> tuple[np.ndarray[bool], np.ndarray[bool], np.ndarray[bool]]:
     """
     Create a full array of a repeated (tile) color filter array the size of our original image. 
     Map the color filter array to each color channel name using the incoming color_desc. All color channel masks will be a Boolean type. For the Red channel, if a pixel is red -> True. 
