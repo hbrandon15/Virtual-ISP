@@ -15,9 +15,12 @@ The pipeline processes a RAW `.ARW` (Sony) file through the following stages:
 7. **Gamma / Tone Mapping** — Apply the sRGB transfer function (linear below 0.0031308, power curve above).
 
 ## Known Limitations / Design Decisions
-- The Color Correction Matrix is bypassed (np.eye(3)) intentionally 
-- Why: the calibration matrices from rawpy are coupled to libraw's internal pipeline conventions, so dropping them into a custom pipeline withouth knowing libraw's exact ordering and scaling contract produces incorrect results (severe green cast). 
-- What would be needed to fix it: either reverse-engineer libraw's conventions or derive an independent Color Correction Matrix from a color check calibration target. 
+
+**Color Correction Matrix is bypassed (`np.eye(3)`) intentionally.**
+
+The calibration matrices from rawpy are coupled to libraw's internal pipeline conventions. Dropping them into a custom pipeline without knowing libraw's exact ordering and scaling contract produces incorrect results (severe green cast — R row sums to -0.47, G to 1.51).
+
+To fix this properly: either reverse-engineer libraw's conventions or derive an independent CCM from a color checker calibration target.
 
 ## Dependencies
 
