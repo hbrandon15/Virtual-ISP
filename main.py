@@ -72,7 +72,7 @@ def linearize_bayer(bayer: np.ndarray, black_level: np.ndarray, white_level: int
     return np.clip(linear, 0.0, 1.0)
 
 
-def build_rgb_masks(bayer: np.ndarray, cfa: np.ndarray, color_desc: bytes) -> tuple[np.ndarray[bool], np.ndarray[bool], np.ndarray[bool]]:
+def build_rgb_masks(bayer: np.ndarray, cfa: np.ndarray, color_desc: bytes) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Create a full array of a repeated (tile) color filter array the size of our original image. 
     Map the color filter array to each color channel name using the incoming color_desc. All color channel masks will be a Boolean type. For the Red channel, if a pixel is red -> True. 
@@ -89,7 +89,7 @@ def build_rgb_masks(bayer: np.ndarray, cfa: np.ndarray, color_desc: bytes) -> tu
     return red_mask, green_mask, blue_mask
 
 
-def demosaic_bilinear(linear_bayer: np.ndarray, red_mask: np.ndarray[bool], green_mask: np.ndarray[bool], blue_mask: np.ndarray[bool]) -> np.ndarray:
+def demosaic_bilinear(linear_bayer: np.ndarray, red_mask: np.ndarray, green_mask: np.ndarray, blue_mask: np.ndarray) -> np.ndarray:
     """
     Reconstructing incomplete color sample output from an image sensor overlaid with a color filter array into a full color image. 
     Bilinear - estimating each missing pixel in both horizontal and vertical directions. 
@@ -121,7 +121,7 @@ def demosaic_bilinear(linear_bayer: np.ndarray, red_mask: np.ndarray[bool], gree
     return rgb_linear
 
 
-def interpolate_channel(values, known_mask):
+def interpolate_channel(values: np.ndarray, known_mask: np.ndarray) -> np.ndarray:
     """
     values is a full (h,w) float 32 array with mostly zeros, with actual color values at their placed locations. 
 
@@ -162,7 +162,7 @@ def interpolate_channel(values, known_mask):
 # -- CORRECT WHITE BALANCE --
 
 
-def normalize_white_balance(wb_mult):
+def normalize_white_balance(wb_mult: list) -> np.ndarray:
 
     red_balance, green_balance, blue_balance = wb_mult[0], wb_mult[1], wb_mult[2]
 
