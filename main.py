@@ -178,7 +178,7 @@ def normalize_white_balance(wb_mult: list) -> np.ndarray:
     return n_wb
 
 
-def apply_white_balance(rgb_linear, gains):
+def apply_white_balance(rgb_linear: np.ndarray, gains: np.ndarray) -> np.ndarray:
     red_channel = rgb_linear[:, :, 0]
     green_channel = rgb_linear[:, :, 1]
     blue_channel = rgb_linear[:, :, 2]
@@ -197,7 +197,7 @@ def apply_white_balance(rgb_linear, gains):
 # -- CORRECT COLOR SPACE --
 
 
-def color_space_conversion(ccm, rgb_wb):
+def color_space_conversion(ccm: np.ndarray, rgb_wb: np.ndarray) -> np.ndarray:
     """
     1. Flatten the image to a list of RGB triplets
     2. Apply CCM. We use .T (transpose) because our pixels are now rows
@@ -220,7 +220,7 @@ def color_space_conversion(ccm, rgb_wb):
 # -- GAMMA & TONE MAPPING --
 
 
-def apply_srgb_gamma(rgb_linear):
+def apply_srgb_gamma(rgb_linear: np.ndarray) -> np.ndarray:
 
     # Apply sRGB transfer function
     rgb = np.where(rgb_linear <= 0.0031308,  # condition
