@@ -67,7 +67,9 @@ def linearize_bayer(bayer: np.ndarray, black_level: np.ndarray, white_level: int
     black_scalar = float(black_level[0])
     linear = (bayer.astype(np.float32) - black_scalar) / \
         (white_level - black_scalar)
-    return np.clip(linear, 0.0, 1.0)  # limit linear values between 0 and 1
+    
+    # return linear array normalized between 0 and 1
+    return np.clip(linear, 0.0, 1.0)  
 
 
 def build_rgb_masks(bayer, cfa, color_desc):
