@@ -71,6 +71,8 @@ coverage.xml
 Thumbs.db
 Desktop.ini
 
-# RAW images
+# RAW images and source image folder
 *.dng
 *.arw
+*.ARW
+imgs/

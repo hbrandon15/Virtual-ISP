@@ -4,6 +4,8 @@ A hands-on project to build a simplified Image Signal Processing (ISP) pipeline 
 
 ## Pipeline
 
+![ISP Pipeline Diagram](pipeline_diagram.png)
+
 The pipeline processes a RAW `.ARW` (Sony) file through the following stages:
 
 1. **Decode & Extract** — Read the Bayer mosaic, CFA layout, black/white levels, white balance multipliers, and the camera-to-XYZ color matrix using `rawpy`.
