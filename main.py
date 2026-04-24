@@ -89,7 +89,7 @@ def build_rgb_masks(bayer: np.ndarray, cfa: np.ndarray, color_desc: bytes) -> tu
     return red_mask, green_mask, blue_mask
 
 
-def demosaic_bilinear(linear_bayer, red_mask, green_mask, blue_mask):
+def demosaic_bilinear(linear_bayer: np.ndarray, red_mask: np.ndarray[bool], green_mask: np.ndarray[bool], blue_mask: np.ndarray[bool]) -> np.ndarray:
     """
     Reconstructing incomplete color sample output from an image sensor overlaid with a color filter array into a full color image. 
     Bilinear - estimating each missing pixel in both horizontal and vertical directions. 
