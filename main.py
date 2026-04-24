@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 # 7. Gamma / tone mapping
 
 
-def display_arw_image(file_path):
+def display_arw_image(file_path: str) -> None:
     """
     This function is only intended to preview a processed image using rawpy by converting sensor data into a standard RGB image. 
 
@@ -25,7 +25,7 @@ def display_arw_image(file_path):
     plt.show()
 
 
-def decode_arw_image(file_path):
+def decode_arw_image(file_path: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, int, bytes, list, np.ndarray]:
     """
     DECODE AND EXTRACT DATA
 
