@@ -59,7 +59,7 @@ def decode_arw_image(file_path: str) -> tuple[np.ndarray, np.ndarray, np.ndarray
 # -- FIND LINEAR --
 
 
-def linearize_bayer(bayer, black_level, white_level):
+def linearize_bayer(bayer: np.ndarray, black_level: np.ndarray, white_level: int) -> np.ndarray:
     """
     Black level - baseline value the sensor reports in complete darkness 
     White level - saturation point. Any photon count above this level clips to the same max value
