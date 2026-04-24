@@ -230,34 +230,39 @@ def apply_srgb_gamma(rgb_linear: np.ndarray) -> np.ndarray:
     return np.clip(rgb, 0.0, 1.0)
 
 
-# STEP 1: OBTAIN METADATA
-bayer, cfa, black, white, color_desc, whitebalance_mult, ccm = decode_arw_image(
-    '.\imgs\AKG02229.ARW')
+def main():
+    # STEP 1: OBTAIN METADATA
+    bayer, cfa, black, white, color_desc, whitebalance_mult, ccm = decode_arw_image(
+        '.\imgs\AKG02229.ARW')
 
-# STEP 2: OBTAIN LINEAR - each pixel is a sensor intensity fraction
-linear = linearize_bayer(bayer, black, white)
+    # STEP 2: OBTAIN LINEAR - each pixel is a sensor intensity fraction
+    linear = linearize_bayer(bayer, black, white)
 
-# STEP 3: CREATE LABEL MAP - Create RGB masks
-red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
+    # STEP 3: CREATE LABEL MAP - Create RGB masks
+    red_mask, green_mask, blue_mask = build_rgb_masks(bayer, cfa, color_desc)
 
-# STEP 4: DEMOSAIC
-rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
+    # STEP 4: DEMOSAIC
+    rgb_linear = demosaic_bilinear(linear, red_mask, green_mask, blue_mask)
 
-# STEP 5: WHITE BALANCE
-wb_gains = normalize_white_balance(whitebalance_mult)
-rgb_wb = apply_white_balance(rgb_linear, wb_gains)
+    # STEP 5: WHITE BALANCE
+    wb_gains = normalize_white_balance(whitebalance_mult)
+    rgb_wb = apply_white_balance(rgb_linear, wb_gains)
 
-# STEP 6: COLOR CORRECTION (identity matrix — see decode_arw_image comment)
-rgb_ccm = color_space_conversion(ccm, rgb_wb)
+    # STEP 6: COLOR CORRECTION (identity matrix — see decode_arw_image comment)
+    rgb_ccm = color_space_conversion(ccm, rgb_wb)
 
-# STEP 7: GAMMA AND TONE MAPPING
-rgb_gamma = apply_srgb_gamma(rgb_ccm)
+    # STEP 7: GAMMA AND TONE MAPPING
+    rgb_gamma = apply_srgb_gamma(rgb_ccm)
 
-# CONVERT TO UINT8 FOR DISPLAY
-rgb_display = (rgb_gamma * 255).astype(np.uint8)
+    # CONVERT TO UINT8 FOR DISPLAY
+    rgb_display = (rgb_gamma * 255).astype(np.uint8)
 
-plt.imshow(np.rot90(rgb_display))
-plt.title('Final ISP Output')
-plt.axis('off')
-plt.savefig("isp_output.png", dpi=300, bbox_inches='tight', pad_inches=0)
-plt.show()
+    plt.imshow(np.rot90(rgb_display))
+    plt.title('Final ISP Output')
+    plt.axis('off')
+    plt.savefig("isp_output.png", dpi=300, bbox_inches='tight', pad_inches=0)
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
