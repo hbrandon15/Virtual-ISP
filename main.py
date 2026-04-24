@@ -204,8 +204,6 @@ def color_space_conversion(ccm: np.ndarray, rgb_wb: np.ndarray) -> np.ndarray:
 
     """
     h, w, c = rgb_wb.shape
-    # first_pixel = rgb_wb[0, 0, :]  # shape (3,)
-    # rgb_values = first_pixel.reshape(3, 1)  # new shape (3,1)
 
     # reshape(-1,3) will stack our data into rows for processing.
     pixels = rgb_wb.reshape(-1, 3)
